@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+   <head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+		<title>Babylon - Basic scene</title>
+		<style>
+		html, body {
+			overflow: hidden;
+			width: 100%;
+			height: 100%;
+			margin: 0;
+			padding: 0;
+		}
+
+		#renderCanvas {
+			width: 100%;
+			height: 100%;
+			touch-action: none;
+		}
+		</style>
+
+		<script src="babylon.1.14.js"></script>
+		<script src="Oimo.js"></script>
+   </head>
+
+   <body>
+
+   		<canvas id="renderCanvas"></canvas>
+
+   		<script>
+
+		// Get the canvas element from our HTML above
+		var canvas = document.getElementById("renderCanvas");
+
+		// Load the BABYLON 3D engine
+		var engine = new BABYLON.Engine(canvas, true);
+
+		var camera;
+
+		var Key = {
+			_pressed: {},
+
+			LEFT: 65,
+			UP: 87,
+			RIGHT: 68,
+			DOWN: 83,
+
+			isDown: function(keyCode) {
+				return this._pressed[keyCode];
+			},
+
+			onKeydown: function(event) {
+				this._pressed[event.keyCode] = true;
+			},
+
+			onKeyup: function(event) {
+				delete this._pressed[event.keyCode];
+			}
+		};
+
+		window.addEventListener('keyup', function(event) { Key.onKeyup(event); }, false);
+		window.addEventListener('keydown', function(event) { Key.onKeydown(event); }, false);
+
+		// This begins the creation of a function that we will 'call' just after it's built
+		var createScene = function () {
+
+		// Now create a basic Babylon Scene object 
+		var scene = new BABYLON.Scene(engine);
+
+		// Change the scene background color to green.
+		scene.clearColor = new BABYLON.Color3(0, 1, 0);
+
+		// This creates and positions a free camera
+		camera = new BABYLON.FreeCamera("camera1", new BABYLON.Vector3(0, 5, -10), scene);
+
+		camera.noRotationConstraint = true;
+
+
+		// This targets the camera to scene origin
+		camera.setTarget(BABYLON.Vector3.Zero());
+
+		// This attaches the camera to the canvas
+		//camera.attachControl(canvas, false);
+
+
+		// This creates a light, aiming 0,1,0 - to the sky.
+		var light = new BABYLON.HemisphericLight("light1", new BABYLON.Vector3(0, 1, 0), scene);
+
+		// Dim the light a small amount
+		light.intensity = .5;
+
+		// Let's try our built-in 'sphere' shape. Params: name, subdivisions, size, scene
+		var sphere = BABYLON.Mesh.CreateSphere("sphere1", 9, 2, scene);
+
+
+
+		// Move the sphere upward 1/2 its height
+		sphere.position.y = 1;
+
+		// Let's try our built-in 'ground' shape.  Params: name, width, depth, subdivisions, scene
+		var ground = BABYLON.Mesh.CreateGround("ground1", 12, 12, 2, scene);
+
+
+		// Leave this function
+		return scene;
+
+		};  // End of createScene function
+
+		// Now, call the createScene function that you just finished creating
+  		var scene = createScene();
+
+  		// Register a render loop to repeatedly render the scene
+		engine.runRenderLoop(function () {
+			
+			var step = 0.05;
+
+			if (Key.isDown(Key.UP)) camera.cameraDirection.z += step;
+			if (Key.isDown(Key.LEFT)) camera.cameraDirection.x -= step;
+			if (Key.isDown(Key.DOWN)) camera.cameraDirection.z -= step;
+			if (Key.isDown(Key.RIGHT)) camera.cameraDirection.x += step;
+
+			checkMovement()
+
+			scene.render();
+
+		});
+
+		// Watch for browser/canvas resize events
+		window.addEventListener("resize", function () {
+			engine.resize();
+		});
+
+		var unidad = null;
+		var destino = null;
+		var direccion = null;
+
+	   //When pointer down event is raised
+	    scene.onPointerDown = function (evt, pickResult) {
+	        // if the click hits the ground object, we change the impact position
+	        if (pickResult.hit) {
+
+	        	if(pickResult.pickedMesh.name == "sphere1"){
+	        		pickedUnit = "sphere1"
+	        		console.log("sphere picked!!!")
+	        	}
+	        	else if(pickResult.pickedMesh.name == "ground1" && pickedUnit != null){
+
+	        		unidad = scene.getMeshByName(pickedUnit);
+	        		destino = pickResult.pickedPoint;
+	        		direccion = destino.subtract(unidad.position);
+	        	}
+	        }
+	    };
+
+	    function checkMovement(){
+	    	if(unidad != null && destino != null){
+				if (BABYLON.Vector3.Distance(unidad.position,destino) > 0.1){
+					unidad.position = unidad.position.add(direccion.normalize().multiplyByFloats(0.1,0.1,0.1));
+				}
+			}
+		}
+
+
+
+		</script>
+
+   </body>
+
+</html>
+
