@@ -7,6 +7,8 @@ var Key = {
 	UP: 87,
 	RIGHT: 68,
 	DOWN: 83,
+	LROTATE: 81,
+	RROTATE: 69,
 
 	isDown: function(keyCode) {
 		return this._pressed[keyCode];

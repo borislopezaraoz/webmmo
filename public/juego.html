@@ -22,6 +22,8 @@
 
 		<script src="javascripts/babylon.1.14.js"></script>
 		<script src="javascripts/Oimo.js"></script>
+		<script src="javascripts/cameraControl.js"></script>
+		<script src="javascripts/unit.js"></script>
    </head>
 
    <body>
@@ -30,97 +32,51 @@
 
    		<script>
 
-		// Get the canvas element from our HTML above
 		var canvas = document.getElementById("renderCanvas");
-
-		// Load the BABYLON 3D engine
 		var engine = new BABYLON.Engine(canvas, true);
 
 		var camera;
-
-		var Key = {
-			_pressed: {},
-
-			LEFT: 65,
-			UP: 87,
-			RIGHT: 68,
-			DOWN: 83,
-
-			isDown: function(keyCode) {
-				return this._pressed[keyCode];
-			},
-
-			onKeydown: function(event) {
-				this._pressed[event.keyCode] = true;
-			},
-
-			onKeyup: function(event) {
-				delete this._pressed[event.keyCode];
-			}
-		};
-
-		window.addEventListener('keyup', function(event) { Key.onKeyup(event); }, false);
-		window.addEventListener('keydown', function(event) { Key.onKeydown(event); }, false);
-
 		// This begins the creation of a function that we will 'call' just after it's built
 		var createScene = function () {
 
-		// Now create a basic Babylon Scene object 
-		var scene = new BABYLON.Scene(engine);
+			var scene = new BABYLON.Scene(engine);
+			scene.clearColor = new BABYLON.Color3(0, 1, 0);
 
-		// Change the scene background color to green.
-		scene.clearColor = new BABYLON.Color3(0, 1, 0);
-
-		// This creates and positions a free camera
-		camera = new BABYLON.FreeCamera("camera1", new BABYLON.Vector3(0, 5, -10), scene);
-
-		camera.noRotationConstraint = true;
+			//seting the camera
+			camera = new BABYLON.FreeCamera("camera1", new BABYLON.Vector3(0, 5, -10), scene);
+			camera.noRotationConstraint = true;
+			camera.setTarget(BABYLON.Vector3.Zero());
 
 
-		// This targets the camera to scene origin
-		camera.setTarget(BABYLON.Vector3.Zero());
+			// This creates a light, aiming 0,1,0 - to the sky.
+			var light = new BABYLON.HemisphericLight("light1", new BABYLON.Vector3(0, 1, 0), scene);
+			light.intensity = .5;
 
-		// This attaches the camera to the canvas
-		//camera.attachControl(canvas, false);
+			// Let's try our built-in 'ground' shape.  Params: name, width, depth, subdivisions, scene
+			var ground = BABYLON.Mesh.CreateGround("ground1", 12, 12, 2, scene);
 
+			return scene;
 
-		// This creates a light, aiming 0,1,0 - to the sky.
-		var light = new BABYLON.HemisphericLight("light1", new BABYLON.Vector3(0, 1, 0), scene);
+		}; 
 
-		// Dim the light a small amount
-		light.intensity = .5;
-
-		// Let's try our built-in 'sphere' shape. Params: name, subdivisions, size, scene
-		var sphere = BABYLON.Mesh.CreateSphere("sphere1", 9, 2, scene);
-
-
-
-		// Move the sphere upward 1/2 its height
-		sphere.position.y = 1;
-
-		// Let's try our built-in 'ground' shape.  Params: name, width, depth, subdivisions, scene
-		var ground = BABYLON.Mesh.CreateGround("ground1", 12, 12, 2, scene);
-
-
-		// Leave this function
-		return scene;
-
-		};  // End of createScene function
-
-		// Now, call the createScene function that you just finished creating
   		var scene = createScene();
 
-  		// Register a render loop to repeatedly render the scene
+  		//load units
+  		var units = [new Unit("mesh2", "box", "blue", [0,0,0], [6,0,15], scene),
+				 	new Unit("mesh1", "sphere", "yellow", [2,0,4], [6,0,-10], scene)];
+
 		engine.runRenderLoop(function () {
-			
-			var step = 0.05;
 
-			if (Key.isDown(Key.UP)) camera.cameraDirection.z += step;
-			if (Key.isDown(Key.LEFT)) camera.cameraDirection.x -= step;
-			if (Key.isDown(Key.DOWN)) camera.cameraDirection.z -= step;
-			if (Key.isDown(Key.RIGHT)) camera.cameraDirection.x += step;
+			if (Key.isDown(Key.UP)) camera.cameraDirection.z += cameraSpeed;
+			if (Key.isDown(Key.LEFT)) camera.cameraDirection.x -= cameraSpeed;
+			if (Key.isDown(Key.DOWN)) camera.cameraDirection.z -= cameraSpeed;
+			if (Key.isDown(Key.RIGHT)) camera.cameraDirection.x += cameraSpeed;
 
-			checkMovement()
+			if (Key.isDown(Key.LROTATE)) camera.rotation.y += Math.PI*0.01;
+			if (Key.isDown(Key.RROTATE)) camera.rotation.y -= Math.PI*0.01;
+
+
+			checkMovement();
 
 			scene.render();
 
@@ -131,36 +87,41 @@
 			engine.resize();
 		});
 
-		var unidad = null;
-		var destino = null;
-		var direccion = null;
+		var pickedUnit = null;
 
 	   //When pointer down event is raised
 	    scene.onPointerDown = function (evt, pickResult) {
 	        // if the click hits the ground object, we change the impact position
 	        if (pickResult.hit) {
 
-	        	if(pickResult.pickedMesh.name == "sphere1"){
-	        		pickedUnit = "sphere1"
-	        		console.log("sphere picked!!!")
+	        	if(pickResult.pickedMesh.name == "mesh1" || pickResult.pickedMesh.name == "mesh2" ){
+	        		pickedUnit = pickResult.pickedMesh;
+	        		console.log("the unit "+pickedUnit.name +" has been picked");
 	        	}
 	        	else if(pickResult.pickedMesh.name == "ground1" && pickedUnit != null){
 
-	        		unidad = scene.getMeshByName(pickedUnit);
-	        		destino = pickResult.pickedPoint;
-	        		direccion = destino.subtract(unidad.position);
+	        		var position = pickedUnit.position;
+	        		var destiny = pickResult.pickedPoint;
+	        		console.log("the unit "+pickedUnit.name +" has sent from "+position+" to "+destiny);
+
+
 	        	}
 	        }
 	    };
 
 	    function checkMovement(){
-	    	if(unidad != null && destino != null){
-				if (BABYLON.Vector3.Distance(unidad.position,destino) > 0.1){
-					unidad.position = unidad.position.add(direccion.normalize().multiplyByFloats(0.1,0.1,0.1));
+
+			var arrayLength = units.length;
+			for (var i = 0; i < arrayLength; i++) {
+				if(units[i].destiny != null){
+					if (BABYLON.Vector3.Distance(units[i].mesh.position,units[i].destiny) > 0.1){
+						var dir = units[i].destiny.subtract(units[i].mesh.position).normalize();
+						units[i].mesh.position = units[i].mesh.position.add(dir.multiplyByFloats(0.1,0.1,0.1));
+					}
 				}
 			}
-		}
 
+		}
 
 
 		</script>
