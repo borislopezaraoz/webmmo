@@ -80,19 +80,19 @@ function tip(type, name) {
 	var tip,title;
 	switch(type){
 		case 'online':
-			tip = name + ' is online now.';
+			tip = name + ' is online now';
 			title = 'Online Notify';
 			break;
 		case 'offline':
-			tip = name + ' is offline now.';
+			tip = name + ' is offline now';
 			title = 'Offline Notify';
 			break;
 		case 'message':
-			tip = name + ' is saying now.'
+			tip = name + ' is moving'
 			title = 'Message Notify';
 			break;
 	}
-	var pop=new Pop(title, tip);
+	var pop = new Pop(title, tip);
 };
 
 // init user list
@@ -203,7 +203,6 @@ $(document).ready(function() {
 		removeUser(user);
 	});
 
-
 	//handle disconect message, occours when the client is disconnect with servers
 	pomelo.on('disconnect', function(reason) {
 		showLogin();
@@ -244,6 +243,7 @@ $(document).ready(function() {
 					setRoom();
 					showChat();
 					initUserList(data);
+					game.init(users);
 				});
 			});
 		});

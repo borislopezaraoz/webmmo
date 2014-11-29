@@ -6,7 +6,7 @@ Install Node.js
 
 Instructions:
 
-1. Replace your host name in:
+1. Replace your host name in: (need to fix this)
 
 game-server/config/servers.json
 game-server/config/master.json
@@ -22,4 +22,13 @@ pomelo start
 cd web-server
 node app.js
 
-5. Goto: http://<your host name>:3001/juego2.html
+5. Login to http://<your host name>:3001/game.html from different tabs/windows/browsers/computers
+
+6. Play around moving the units
+
+
+
+Current issues:
+
+Position of units is initially center is not synchronized until the unit moves.
+The server should assign initial position and broadcast.

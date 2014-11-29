@@ -22,5 +22,5 @@ app.configure('production', function(){
 	app.use(express.errorHandler());
 });
 
-console.log("Web server has started.\nPlease log on http://boris.local:3001/index.html");
+console.log("Web server has started.\nPlease log on http://boris.local:3001/game.html");
 app.listen(3001);

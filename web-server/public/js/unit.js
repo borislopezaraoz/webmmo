@@ -29,7 +29,8 @@ function Unit (id, figure, color, position, destiny, scene) {
 	this.mesh.material = material;
 
 	this.position = new BABYLON.Vector3(position[0],position[1],position[2]);
-	if(destiny != null){
+
+	if (destiny != null) {
 		this.destiny = new BABYLON.Vector3(destiny[0],destiny[1],destiny[2]);
 	}
 
