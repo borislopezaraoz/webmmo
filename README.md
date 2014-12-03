@@ -11,6 +11,7 @@ Instructions:
 - Replace your host name in: (need to fix this)
 
 game-server/config/servers.json
+
 game-server/config/master.json
 
 - Run npm-install.sh or npm-install.bat. This will install all required Node packages.
@@ -18,11 +19,13 @@ game-server/config/master.json
 - Start the game server:
 
 cd game-server
+
 pomelo start
 
 - Start the web server:
 
 cd web-server
+
 node app.js
 
 - Login to http://<your host name>:3001/game.html from different tabs/windows/browsers/computers
