@@ -2,7 +2,9 @@ Simple MMO (massively multiplayer online) using pomelo.netease.com for backend a
 
 Requisites:
 
-Install Node.js
+1. Install Node.js
+2. Install Pomelo: https://github.com/NetEase/pomelo/wiki/Installation
+
 
 Instructions:
 
@@ -32,3 +34,4 @@ Current issues:
 
 Position of units is initially center is not synchronized until the unit moves.
 The server should assign initial position and broadcast.
+Handle logout event.
