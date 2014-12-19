@@ -5,6 +5,7 @@ var game = {
 	pickedUnit : null,
 	units : null,
 	init : function(users) {
+
 		game.engine = new BABYLON.Engine(document.getElementById("renderCanvas"), true);
 		game.scene = game.createScene();
 		game.camera = game.createCamera();
@@ -17,7 +18,7 @@ var game = {
 		//When pointer down event is raised
 		game.scene.onPointerDown = function (evt, pickResult) {
 			console.log(pickResult.pickedMesh.name);
-		    // if the click hits the ground object, we change the impact position
+		    // if the click hits the ground object, we change the impact position 
 		    if (pickResult.hit) {
 		    	if (pickResult.pickedMesh.name == username) {
 		    		game.pickedUnit = pickResult.pickedMesh;
@@ -25,6 +26,7 @@ var game = {
 		    	} else if (pickResult.pickedMesh.name == "ground1" && game.pickedUnit != null) {
 		    		var position = game.pickedUnit.position;
 		    		var destiny = pickResult.pickedPoint;
+
 		    		console.log("the unit " + game.pickedUnit.name + " has been sent from " + position + " to " + destiny);
 		    		var message = JSON.stringify(new Unit2(position, destiny));
 		    		console.log("message=" + message);
@@ -73,20 +75,27 @@ var game = {
 		scene.clearColor = new BABYLON.Color3(0, 1, 0);
 		// this creates a light, aiming 0,1,0 - to the sky
 		var light = new BABYLON.HemisphericLight("light1", new BABYLON.Vector3(0, 1, 0), scene);
-		light.intensity = .5;
+		light.intensity = 1.5;
 		// let's try our built-in 'ground' shape.  Params: name, width, depth, subdivisions, scene
 		var ground = BABYLON.Mesh.CreateGround("ground1", 12, 12, 2, scene);
+
 		return scene;
 	},
 	createUnits : function(users) {
 		game.units = {};
 		for (var i = 0; i < users.length; i++) {
 			console.log(users[i]);
-			game.units[users[i]] = new Unit(users[i], "sphere", "blue", [0, 0, 0], [i * 2, 0, i * 2], game.scene);
+			game.units[users[i]] = new Unit(users[i], "link", "blue", [0, 0, 0], [i * 2, 0, i * 2], game.scene);
 		}
+
+		for (var user in game.units) {
+			console.log("asdadasdasdasdasdasdsadasdasdsadsadsadasdsadsadsadasdas>>>>>>");
+			console.log(user);
+		}
+
 	},
 	addUnit : function(user) {
-		game.units[user] = new Unit(user, "sphere", "blue", [0, 0, 0], [0, 0, 0], game.scene);
+		game.units[user] = new Unit(user, "link", "blue", [0, 0, 0], [0, 0, 0], game.scene);
 	},
 	removeUnit : function(user) {
 		delete game.units[user];
@@ -103,13 +112,21 @@ var game = {
 	},
 	checkMovement : function() {
 		for (var user in game.units) {
+
 			var unit = game.units[user];
-			if (unit.destiny != null) {
+			if (unit.destiny != null && unit.mesh != null) {
+
+				unit.mesh.lookAt(unit.destiny, unit.mesh.rotation.y, unit.mesh.rotation.x);
+				unit.animate('run');
+
 				if (BABYLON.Vector3.Distance(unit.mesh.position, unit.destiny) > 0.1) {
 					var dir = unit.destiny.subtract(unit.mesh.position).normalize();
 					unit.mesh.position = unit.mesh.position.add(dir.multiplyByFloats(0.1, 0.1, 0.1));
+				} else {
+					unit.animate('stand');
+					unit.destiny = null;
 				}
-			}
+			} 
 		}
 	}
 };
